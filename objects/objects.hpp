@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../ray.h"
+#include "../ray.hpp"
 #include "hit.hpp"
 
 class object {
