@@ -49,6 +49,8 @@ int main() {
     double viewport_height = 2.;
     double viewport_width =
         viewport_height * (static_cast<double>(image_width) / image_height);
+    std::cout << "viewport_width: " << viewport_width << std::endl;
+    std::cout << "viewport_height: " << viewport_height << std::endl;
     point3 camera_center = point3(0, 0, 0);
 
     // Calculate the vectors across the horizontal and down the verstical
@@ -61,10 +63,10 @@ int main() {
     vec3 pixel_delta_v = viewport_v / image_height;
 
     // Calculate the location of the upper left pixel.
-    point3 viewport_upper_left = camera_center - viewport_u / 2 + viewport_v / 2
+    point3 viewport_upper_left = camera_center - viewport_u / 2 - viewport_v / 2
                                - vec3(0, 0, focal_length);
     point3 pixel00_loc =
-        viewport_upper_left + .5 * (pixel_delta_u - pixel_delta_v);
+        viewport_upper_left + .5 * (pixel_delta_u + pixel_delta_v);
 
 
     std::string filename = "image.ppm";

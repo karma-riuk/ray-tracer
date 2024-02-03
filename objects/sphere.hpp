@@ -9,7 +9,7 @@ class sphere : public object {
   public:
     sphere(point3 c, double r): center(c), radius(r) {}
 
-    sphere(): center(0, 0, -1), radius(.10) {}
+    sphere(): center(0, 0, -1), radius(.5) {}
 
     hit intersect(const ray& r) const;
 };
