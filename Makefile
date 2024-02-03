@@ -1,9 +1,7 @@
 CPPFLAGS := -Wall -O3
-.PHONY: all clean run
+.PHONY: clean run
 
-main: color.o
-
-all: main
+main: color.o objects/sphere.o
 
 clean:
 	rm -f main
