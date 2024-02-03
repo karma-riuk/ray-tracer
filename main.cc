@@ -1,8 +1,6 @@
 #include <fstream>
 #include <iostream>
 
-// #include <string>
-
 void progress_bar(double progress) {
     int barWidth = 70;
 
