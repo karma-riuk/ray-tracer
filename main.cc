@@ -1,9 +1,11 @@
 #include "color.hpp"
+#include "objects/sphere.hpp"
 #include "ray.hpp"
 #include "vec3.hpp"
 
 #include <fstream>
 #include <iostream>
+#include <vector>
 
 color ray_color(const ray& r) {
     vec3 unit_direction = unit_vector(r.direction());
@@ -25,6 +27,12 @@ void progress_bar(double progress) {
             std::cout << " ";
     std::cout << "] " << int(progress * 100.0) << " %\r";
     std::cout.flush();
+}
+
+std::vector<object*> generate_scene() {
+    std::vector<object*> objects;
+    objects.push_back(new sphere());
+    return objects;
 }
 
 int main() {
@@ -62,6 +70,9 @@ int main() {
     std::string filename = "image.ppm";
     std::ofstream file(filename);
 
+    // Get the scene
+    std::vector<object*> scene = generate_scene();
+
     // Render
     file << "P3\n" << image_width << " " << image_height << "\n255\n";
 
@@ -70,10 +81,18 @@ int main() {
         for (int i = 0; i < image_width; ++i) {
             point3 pixel_center =
                 pixel00_loc + i * pixel_delta_u + j * pixel_delta_v;
-            vec3 ray_direction = pixel_center - camera_center;
+            vec3 ray_direction = unit_vector(pixel_center - camera_center);
 
             ray r = ray(camera_center, ray_direction);
             color pixel_color = ray_color(r);
+
+            for (auto obj : scene) {
+                hit h = obj->intersect(r);
+                if (h.hit) {
+                    pixel_color = color(1, 0, 0);
+                    break;
+                }
+            }
 
             double progress =
                 (1. + i + j * image_width) / (image_width * image_height);

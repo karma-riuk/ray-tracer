@@ -1,12 +1,19 @@
 CPPFLAGS := -Wall -O3
 .PHONY: clean run
 
-main: color.o objects/sphere.o
+ALL_SRCS = $(wildcard objects/*.cc)
+ALL_SRCS += $(wildcard *.cc)
+SRCS = $(filter-out main.cc,$(ALL_SRCS))
+OBJS = $(SRCS:.cc=.o)
+
+main: $(OBJS)
+
+%.o: %.cc %.hpp 
+	g++ $(CPPFLAGS) -c -o $@ $<
 
 clean:
 	rm -f main
-	rm -f *.o
-	rm -f **/*.o
+	rm -f $(OBJS)
 
 run: main
 	./main
