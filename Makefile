@@ -1,6 +1,8 @@
 CPPFLAGS := -Wall -O3
 .PHONY: all clean run
 
+main: color.o
+
 all: main
 
 clean:
