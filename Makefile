@@ -5,6 +5,8 @@ main: color.o objects/sphere.o
 
 clean:
 	rm -f main
+	rm -f *.o
+	rm -f **/*.o
 
 run: main
 	./main
