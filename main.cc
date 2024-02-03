@@ -89,9 +89,9 @@ int main() {
             color pixel_color = ray_color(r);
 
             for (auto obj : scene) {
-                hit h = obj->intersect(r);
-                if (h.hit) {
-                    pixel_color = color(1, 0, 0);
+                hit hit = obj->intersect(r);
+                if (hit.hit) {
+                    pixel_color = 0.5 * (hit.normal + 1);
                     break;
                 }
             }
