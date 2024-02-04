@@ -1,17 +1,11 @@
 #pragma once
 
-#include "../ray.hpp"
-#include "hit.hpp"
+#include "object.hpp"
 
 #include <memory>
 #include <vector>
 
-class object {
-  public:
-    virtual hit intersect(const ray& r, double t_min, double t_max) const = 0;
-};
-
-class object_list : object {
+class object_list : public object {
   public:
     std::vector<std::shared_ptr<object>> objects;
 

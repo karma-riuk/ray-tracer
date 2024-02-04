@@ -1,4 +1,5 @@
 #include "color.hpp"
+#include "objects/object_list.hpp"
 #include "objects/sphere.hpp"
 #include "ray.hpp"
 #include "vec3.hpp"

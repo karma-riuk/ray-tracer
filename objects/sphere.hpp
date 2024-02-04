@@ -1,6 +1,6 @@
 #pragma once
 
-#include "objects.hpp"
+#include "object.hpp"
 
 class sphere : public object {
     point3 center;
