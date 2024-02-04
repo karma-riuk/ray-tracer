@@ -7,7 +7,11 @@
 #include <fstream>
 #include <iostream>
 
-color ray_color(const ray& r) {
+color ray_color(const ray& r, const object& scene) {
+    hit hit = scene.intersect(r, 0.6, 1.4);
+    if (hit.hit)
+        return 0.5 * (hit.normal + 1);
+
     vec3 unit_direction = unit_vector(r.direction());
     double t = 0.5 * (unit_direction.y() + 1.0);
     return (1.0 - t) * color(1.0, 1.0, 1.0) + t * color(0.5, 0.7, 1.0);
@@ -86,11 +90,7 @@ int main() {
             vec3 ray_direction = unit_vector(pixel_center - camera_center);
 
             ray r = ray(camera_center, ray_direction);
-            color pixel_color = ray_color(r);
-
-            hit hit = scene.intersect(r, 0.6, 1.4);
-            if (hit.hit)
-                pixel_color = 0.5 * (hit.normal + 1);
+            color pixel_color = ray_color(r, scene);
 
             double progress =
                 (1. + i + j * image_width) / (image_width * image_height);
