@@ -23,5 +23,6 @@ inline double degrees_to_radians(double degrees) {
 
 // Common Headers
 
+#include "interval.hpp"
 #include "ray.hpp"
 #include "vec3.hpp"

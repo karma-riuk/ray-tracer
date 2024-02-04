@@ -11,6 +11,5 @@ class sphere : public object {
 
     sphere(): center(0, 0, -1), radius(.5) {}
 
-    virtual hit
-    intersect(const ray& r, double t_min, double t_max) const override;
+    virtual hit intersect(const ray& r, interval ray_t) const override;
 };

@@ -1,9 +1,10 @@
 #pragma once
 
+#include "../interval.hpp"
 #include "../ray.hpp"
 #include "hit.hpp"
 
 class object {
   public:
-    virtual hit intersect(const ray& r, double t_min, double t_max) const = 0;
+    virtual hit intersect(const ray& r, interval ray_t) const = 0;
 };

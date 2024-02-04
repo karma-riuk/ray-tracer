@@ -7,7 +7,7 @@
 #include <iostream>
 
 color ray_color(const ray& r, const object& scene) {
-    hit hit = scene.intersect(r, 0, infinity);
+    hit hit = scene.intersect(r, interval(0, infinity));
     if (hit.hit)
         return 0.5 * (hit.normal + 1);
 

@@ -17,13 +17,13 @@ class object_list : public object {
         objects.push_back(obj);
     }
 
-    hit intersect(const ray& r, double t_min, double t_max) const override {
+    hit intersect(const ray& r, interval ray_t) const override {
         hit tmp_hit;
         hit hit;
-        auto closest_so_far = t_max;
+        auto closest_so_far = ray_t.max;
 
         for (const auto& obj : objects) {
-            tmp_hit = obj->intersect(r, t_min, closest_so_far);
+            tmp_hit = obj->intersect(r, interval(ray_t.min, closest_so_far));
             if (tmp_hit.hit) {
                 closest_so_far = tmp_hit.t;
                 hit = tmp_hit;
