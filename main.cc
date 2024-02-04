@@ -5,7 +5,6 @@
 
 #include <fstream>
 #include <iostream>
-#include <vector>
 
 color ray_color(const ray& r) {
     vec3 unit_direction = unit_vector(r.direction());
@@ -31,7 +30,7 @@ void progress_bar(double progress) {
 
 object_list generate_scene() {
     object_list objects;
-    objects.add(std::shared_ptr<object>(new sphere()));
+    objects.add(std::make_shared<sphere>());
     return objects;
 }
 
