@@ -1,14 +1,13 @@
 #include "color.hpp"
 #include "objects/object_list.hpp"
 #include "objects/sphere.hpp"
-#include "ray.hpp"
-#include "vec3.hpp"
+#include "rtweekend.hpp"
 
 #include <fstream>
 #include <iostream>
 
 color ray_color(const ray& r, const object& scene) {
-    hit hit = scene.intersect(r, 0.6, 1.4);
+    hit hit = scene.intersect(r, 0, infinity);
     if (hit.hit)
         return 0.5 * (hit.normal + 1);
 
@@ -35,7 +34,10 @@ void progress_bar(double progress) {
 
 object_list generate_scene() {
     object_list objects;
+
     objects.add(std::make_shared<sphere>());
+    objects.add(std::make_shared<sphere>(point3(0, -100.5, -1), 100));
+
     return objects;
 }
 
