@@ -1,6 +1,6 @@
 #include "sphere.hpp"
 
-hit sphere::intersect(const ray& r) const {
+hit sphere::intersect(const ray& r, double t_min, double t_max) const {
     hit hit;
 
     hit.hit = false;
@@ -12,20 +12,23 @@ hit sphere::intersect(const ray& r) const {
     if (delta < 0)
         return hit;
 
-    double t1 = (-b + sqrt(delta)) / (2 * a);
-    double t2 = (-b - sqrt(delta)) / (2 * a);
+    double t1 = (-b - sqrt(delta)) / (2 * a);
+    double t2 = (-b + sqrt(delta)) / (2 * a);
 
-    if (t1 < 0 && t2 < 0)
+    if ((t1 < t_min && t2 < t_min) || (t1 > t_max && t2 > t_max)
+        || (t1 > t_max && t2 < t_min) || (t1 < t_min && t2 > t_max))
         return hit;
     hit.hit = true;
 
-    float t = fmin( // find lowest positive number
-        t1 < 0 ? INFINITY : t1,
-        t2 < 0 ? INFINITY : t2
+    double t = fmin( // find lowest positive number
+        t1 < t_min ? t_max : t1,
+        t2 < t_min ? t_max : t2
     );
 
-    hit.intersection = r.at(t);
-    hit.normal = (hit.intersection - center) / radius;
+    hit.t = t;
+    hit.p = r.at(t);
+    vec3 outwards_normal = (hit.p - center) / radius;
+    hit.set_face_normal(r, outwards_normal);
 
     return hit;
 }

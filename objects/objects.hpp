@@ -5,5 +5,5 @@
 
 class object {
   public:
-    virtual hit intersect(const ray& r) const = 0;
+    virtual hit intersect(const ray& r, double t_min, double t_max) const = 0;
 };
