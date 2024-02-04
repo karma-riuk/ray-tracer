@@ -53,8 +53,6 @@ int main() {
     double viewport_height = 2.;
     double viewport_width =
         viewport_height * (static_cast<double>(image_width) / image_height);
-    std::cout << "viewport_width: " << viewport_width << std::endl;
-    std::cout << "viewport_height: " << viewport_height << std::endl;
     point3 camera_center = point3(0, 0, 0);
 
     // Calculate the vectors across the horizontal and down the verstical
