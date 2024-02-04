@@ -29,9 +29,9 @@ void progress_bar(double progress) {
     std::cout.flush();
 }
 
-std::vector<object*> generate_scene() {
-    std::vector<object*> objects;
-    objects.push_back(new sphere());
+object_list generate_scene() {
+    object_list objects;
+    objects.add(std::shared_ptr<object>(new sphere()));
     return objects;
 }
 
@@ -73,7 +73,7 @@ int main() {
     std::ofstream file(filename);
 
     // Get the scene
-    std::vector<object*> scene = generate_scene();
+    object_list scene = generate_scene();
 
     // Render
     file << "P3\n" << image_width << " " << image_height << "\n255\n";
@@ -88,13 +88,9 @@ int main() {
             ray r = ray(camera_center, ray_direction);
             color pixel_color = ray_color(r);
 
-            for (auto obj : scene) {
-                hit hit = obj->intersect(r, 0.7, 1.3);
-                if (hit.hit) {
-                    pixel_color = 0.5 * (hit.normal + 1);
-                    break;
-                }
-            }
+            hit hit = scene.intersect(r, 0.6, 1.4);
+            if (hit.hit)
+                pixel_color = 0.5 * (hit.normal + 1);
 
             double progress =
                 (1. + i + j * image_width) / (image_width * image_height);
