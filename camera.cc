@@ -56,6 +56,20 @@ void progress_bar(double progress) {
     std::cout.flush();
 }
 
+ray camera::get_ray(int i, int j) const {
+    point3 pixel_center = pixel00_loc + i * pixel_delta_u + j * pixel_delta_v;
+    point3 pixel_sample = pixel_center + pixel_sample_square();
+
+    vec3 ray_direction = pixel_sample - camera_center;
+    return ray(camera_center, ray_direction);
+}
+
+vec3 camera::pixel_sample_square() const {
+    double px = -0.5 + random_double();
+    double py = -0.5 + random_double();
+    return (px * pixel_delta_u + py * pixel_delta_v);
+}
+
 void camera::render(const object& scene) {
     initialize();
 
@@ -65,12 +79,10 @@ void camera::render(const object& scene) {
     std::clog << "Writing to " << filename << std::endl;
     for (int j = 0; j < image_height; ++j) {
         for (int i = 0; i < image_width; ++i) {
-            point3 pixel_center =
-                pixel00_loc + i * pixel_delta_u + j * pixel_delta_v;
-            vec3 ray_direction = unit_vector(pixel_center - camera_center);
-
-            ray r = ray(camera_center, ray_direction);
-            color pixel_color = ray_color(r, scene);
+            color pixel_color(0, 0, 0);
+            for (int s = 0; s < samples_per_pixel; ++s)
+                pixel_color += ray_color(get_ray(i, j), scene);
+            pixel_color /= samples_per_pixel;
 
             double progress =
                 (1. + i + j * image_width) / (image_width * image_height);

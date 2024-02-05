@@ -13,10 +13,13 @@ class camera {
 
     void initialize();
     color ray_color(const ray& r, const object& world) const;
+    ray get_ray(int i, int j) const;
+    vec3 pixel_sample_square() const;
 
   public:
     double aspect_ratio = 1;
     int image_width = 100;
+    int samples_per_pixel = 10;
     std::string filename = "image.ppm";
 
     void render(const object& scene);
