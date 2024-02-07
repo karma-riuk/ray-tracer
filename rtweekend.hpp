@@ -14,7 +14,6 @@ using std::sqrt;
 
 const double infinity = std::numeric_limits<double>::infinity();
 const double pi = 3.141592653589793238462643383;
-;
 
 // Utility Functions
 
@@ -31,9 +30,3 @@ inline double random_double(double min, double max) {
     // Returns a random real in [min,max).
     return min + (max - min) * random_double();
 }
-
-// Common Headers
-
-#include "interval.hpp"
-#include "ray.hpp"
-#include "vec3.hpp"
