@@ -1,7 +1,5 @@
 #include "lambertian.hpp"
 
-// #include "../objects/hit.hpp"
-
 bool lambertian::scatter(
     const ray& r_in, const hit& hit, color& attenuation, ray& scattered
 ) const {
