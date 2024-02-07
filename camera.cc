@@ -8,8 +8,8 @@ color camera::ray_color(const ray& r, int depth, const object& scene) const {
 
     hit hit = scene.intersect(r, interval(0.001, infinity));
     if (hit.hit) {
-        vec3 direction = random_on_hemisphere(hit.normal);
-        return .5 * ray_color(ray(hit.p, direction), depth - 1, scene);
+        vec3 direction = hit.normal + random_unit_vector();
+        return .3 * ray_color(ray(hit.p, direction), depth - 1, scene);
     }
 
     vec3 unit_direction = unit_vector(r.direction());
