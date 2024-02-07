@@ -2,10 +2,15 @@
 
 #include <fstream>
 
-color camera::ray_color(const ray& r, const object& scene) const {
-    hit hit = scene.intersect(r, interval(0, infinity));
-    if (hit.hit)
-        return 0.5 * (hit.normal + 1);
+color camera::ray_color(const ray& r, int depth, const object& scene) const {
+    if (depth <= 0)
+        return color(0, 0, 0);
+
+    hit hit = scene.intersect(r, interval(0.001, infinity));
+    if (hit.hit) {
+        vec3 direction = random_on_hemisphere(hit.normal);
+        return .5 * ray_color(ray(hit.p, direction), depth - 1, scene);
+    }
 
     vec3 unit_direction = unit_vector(r.direction());
     double t = 0.5 * (unit_direction.y() + 1.0);
@@ -81,7 +86,7 @@ void camera::render(const object& scene) {
         for (int i = 0; i < image_width; ++i) {
             color pixel_color(0, 0, 0);
             for (int s = 0; s < samples_per_pixel; ++s)
-                pixel_color += ray_color(get_ray(i, j), scene);
+                pixel_color += ray_color(get_ray(i, j), max_depth, scene);
             pixel_color /= samples_per_pixel;
 
             double progress =

@@ -1,7 +1,6 @@
 #include "camera.hpp"
 #include "objects/object_list.hpp"
 #include "objects/sphere.hpp"
-#include "rtweekend.hpp"
 
 int main() {
     object_list scene;
@@ -13,6 +12,7 @@ int main() {
     cam.aspect_ratio = 9. / 16.;
     cam.image_width = 400;
     cam.samples_per_pixel = 100;
+    cam.max_depth = 50;
 
     cam.render(scene);
 }
