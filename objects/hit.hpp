@@ -3,11 +3,14 @@
 #include "../ray.hpp"
 #include "../vec3.hpp"
 
+struct material;
+
 struct hit {
     double t;
     bool hit = false;
     point3 p;
     vec3 normal;
+    shared_ptr<material> mat;
 
     bool front_face;
 

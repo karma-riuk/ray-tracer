@@ -1,7 +1,7 @@
 CPPFLAGS := -Wall -O3
 .PHONY: clean run
 
-ALL_SRCS = $(wildcard objects/*.cc)
+ALL_SRCS = $(wildcard */*.cc)
 ALL_SRCS += $(wildcard *.cc)
 SRCS = $(filter-out main.cc,$(ALL_SRCS))
 OBJS = $(SRCS:.cc=.o)

@@ -24,6 +24,7 @@ hit sphere::intersect(const ray& r, interval ray_t) const {
     hit.p = r.at(t);
     vec3 outwards_normal = (hit.p - center) / radius;
     hit.set_face_normal(r, outwards_normal);
+    hit.mat = mat;
 
     return hit;
 }
