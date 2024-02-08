@@ -4,22 +4,32 @@
 
 #include <fstream>
 
-color camera::ray_color(const ray& r, int depth, const object& scene) const {
-    if (depth <= 0)
-        return color(0, 0, 0);
+void camera::ray_color(
+    const ray& r, int depth, const object& scene, color& result
+) const {
+    if (depth <= 0) {
+        result = color(0, 0, 0);
+        return;
+    }
 
     hit hit = scene.intersect(r, interval(0.001, infinity));
     if (hit.hit) {
         ray scattered;
         color attenuation;
-        if (hit.mat->scatter(r, hit, attenuation, scattered))
-            return attenuation * ray_color(scattered, depth - 1, scene);
-        return color(0, 0, 0);
+        if (hit.mat->scatter(r, hit, attenuation, scattered)) {
+            color tmp_result;
+            ray_color(scattered, depth - 1, scene, tmp_result);
+            tmp_result = attenuation * tmp_result;
+            result = tmp_result;
+            return;
+        }
+        result = color(0, 0, 0);
+        return;
     }
 
     vec3 unit_direction = unit_vector(r.direction());
     double t = 0.5 * (unit_direction.y() + 1.0);
-    return (1.0 - t) * color(1.0, 1.0, 1.0) + t * color(0.5, 0.7, 1.0);
+    result = (1.0 - t) * color(1.0, 1.0, 1.0) + t * color(0.5, 0.7, 1.0);
 }
 
 void camera::initialize() {
@@ -102,6 +112,7 @@ vec3 camera::pixel_sample_square() const {
 
 void camera::render(const object& scene) {
     initialize();
+    color image[image_width * image_height];
 
     std::ofstream file(filename);
     file << "P3\n" << image_width << " " << image_height << "\n255\n";
@@ -109,13 +120,17 @@ void camera::render(const object& scene) {
     std::clog << "Writing to " << filename << std::endl;
     for (int j = 0; j < image_height; ++j) {
         for (int i = 0; i < image_width; ++i) {
+            color tmp_color(0, 0, 0);
             color pixel_color(0, 0, 0);
-            for (int s = 0; s < samples_per_pixel; ++s)
-                pixel_color += ray_color(get_ray(i, j), max_depth, scene);
+            for (int s = 0; s < samples_per_pixel; ++s) {
+                ray_color(get_ray(i, j), max_depth, scene, tmp_color);
+                pixel_color += tmp_color;
+            }
             pixel_color /= samples_per_pixel;
 
             double progress =
                 (1. + i + j * image_width) / (image_width * image_height);
+
             progress_bar(progress);
             write_color(file, pixel_color);
         }

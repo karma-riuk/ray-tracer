@@ -13,7 +13,8 @@ class camera {
     vec3 defocus_disk_u, defocus_disk_v;
 
     void initialize();
-    color ray_color(const ray& r, int depth, const object& world) const;
+    void ray_color(const ray& r, int depth, const object& world, color& result)
+        const;
     ray get_ray(int i, int j) const;
     vec3 pixel_sample_square() const;
     point3 defocus_disk_sample() const;
