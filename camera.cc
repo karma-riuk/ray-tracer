@@ -30,10 +30,9 @@ void camera::initialize() {
     camera_center = lookfrom;
 
     // Camera
-    double focal_length = (lookfrom - lookat).length();
     double theta = degrees_to_radians(vfov);
     double h = tan(theta / 2.);
-    double viewport_height = 2 * h * focal_length;
+    double viewport_height = 2 * h * focus_dist;
     double viewport_width =
         viewport_height * (static_cast<double>(image_width) / image_height);
 
@@ -53,9 +52,15 @@ void camera::initialize() {
 
     // Calculate the location of the upper left pixel.
     point3 viewport_upper_left =
-        camera_center - focal_length * w - .5 * (viewport_u + viewport_v);
+        camera_center - (focus_dist * w) - .5 * (viewport_u + viewport_v);
 
     pixel00_loc = viewport_upper_left + .5 * (pixel_delta_u + pixel_delta_v);
+
+    // Calculate the camera defocus disk basis vectors.
+    double defocus_radius =
+        focus_dist * tan(degrees_to_radians(defocus_angle / 2));
+    defocus_disk_u = defocus_radius * u;
+    defocus_disk_v = defocus_radius * v;
 }
 
 void progress_bar(double progress) {
@@ -78,8 +83,15 @@ ray camera::get_ray(int i, int j) const {
     point3 pixel_center = pixel00_loc + i * pixel_delta_u + j * pixel_delta_v;
     point3 pixel_sample = pixel_center + pixel_sample_square();
 
-    vec3 ray_direction = pixel_sample - camera_center;
-    return ray(camera_center, ray_direction);
+    point3 origin = defocus_angle <= 0 ? camera_center : defocus_disk_sample();
+    vec3 direction = pixel_sample - origin;
+
+    return ray(origin, direction);
+}
+
+point3 camera::defocus_disk_sample() const {
+    auto p = random_in_unit_disk();
+    return camera_center + (p.x() * defocus_disk_u) + (p.y() * defocus_disk_v);
 }
 
 vec3 camera::pixel_sample_square() const {

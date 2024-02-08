@@ -24,14 +24,17 @@ int main() {
 
     camera cam;
     cam.aspect_ratio = 9. / 16.;
-    cam.image_width = 800;
+    cam.image_width = 400;
     cam.samples_per_pixel = 100;
     cam.max_depth = 50;
 
-    cam.vfov = 90;
+    cam.vfov = 20;
 
     cam.lookfrom = point3(-2, 2, 1);
     cam.lookat = point3(0, 0, -1);
+
+    cam.defocus_angle = 10.0;
+    cam.focus_dist = 3.4;
 
     cam.render(scene);
 }
