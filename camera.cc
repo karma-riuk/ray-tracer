@@ -27,25 +27,33 @@ void camera::initialize() {
     image_height = aspect_ratio * image_width;
     image_height = image_height < 1 ? 1 : image_height;
 
+    camera_center = lookfrom;
+
     // Camera
-    double focal_length = 1.;
-    double viewport_height = 2.;
+    double focal_length = (lookfrom - lookat).length();
+    double theta = degrees_to_radians(vfov);
+    double h = tan(theta / 2.);
+    double viewport_height = 2 * h * focal_length;
     double viewport_width =
         viewport_height * (static_cast<double>(image_width) / image_height);
-    point3 camera_center = point3(0, 0, 0);
+
+    // Calculate the orthonormal basis for the camera.
+    w = unit_vector(lookfrom - lookat);
+    u = unit_vector(cross(vup, w));
+    v = cross(w, u);
 
     // Calculate the vectors across the horizontal and down the verstical
     // viewport edges.
-    vec3 viewport_u = vec3(viewport_width, 0, 0);
-    vec3 viewport_v = vec3(0, -viewport_height, 0);
+    vec3 viewport_u = viewport_width * u;
+    vec3 viewport_v = viewport_height * -v;
 
     // Calculate the hroizontal and vertical delta ectors from pixel to pixel.
     pixel_delta_u = viewport_u / image_width;
     pixel_delta_v = viewport_v / image_height;
 
     // Calculate the location of the upper left pixel.
-    point3 viewport_upper_left = camera_center - viewport_u / 2 - viewport_v / 2
-                               - vec3(0, 0, focal_length);
+    point3 viewport_upper_left =
+        camera_center - focal_length * w - .5 * (viewport_u + viewport_v);
 
     pixel00_loc = viewport_upper_left + .5 * (pixel_delta_u + pixel_delta_v);
 }
