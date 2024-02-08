@@ -2,34 +2,28 @@
 
 #include "materials/material.hpp"
 
+#include <atomic>
 #include <fstream>
+#include <mutex>
+#include <thread>
+#include <vector>
 
-void camera::ray_color(
-    const ray& r, int depth, const object& scene, color& result
-) const {
-    if (depth <= 0) {
-        result = color(0, 0, 0);
-        return;
-    }
+color camera::ray_color(const ray& r, int depth, const object& scene) const {
+    if (depth <= 0)
+        return color(0, 0, 0);
 
     hit hit = scene.intersect(r, interval(0.001, infinity));
     if (hit.hit) {
         ray scattered;
         color attenuation;
-        if (hit.mat->scatter(r, hit, attenuation, scattered)) {
-            color tmp_result;
-            ray_color(scattered, depth - 1, scene, tmp_result);
-            tmp_result = attenuation * tmp_result;
-            result = tmp_result;
-            return;
-        }
-        result = color(0, 0, 0);
-        return;
+        if (hit.mat->scatter(r, hit, attenuation, scattered))
+            return attenuation * ray_color(scattered, depth - 1, scene);
+        return color(0, 0, 0);
     }
 
     vec3 unit_direction = unit_vector(r.direction());
     double t = 0.5 * (unit_direction.y() + 1.0);
-    result = (1.0 - t) * color(1.0, 1.0, 1.0) + t * color(0.5, 0.7, 1.0);
+    return (1.0 - t) * color(1.0, 1.0, 1.0) + t * color(0.5, 0.7, 1.0);
 }
 
 void camera::initialize() {
@@ -118,23 +112,45 @@ void camera::render(const object& scene) {
     file << "P3\n" << image_width << " " << image_height << "\n255\n";
 
     std::clog << "Writing to " << filename << std::endl;
-    for (int j = 0; j < image_height; ++j) {
-        for (int i = 0; i < image_width; ++i) {
-            color tmp_color(0, 0, 0);
+
+    std::atomic<int> progress(0);
+    std::atomic<int> next_pixel_index(0);
+    std::mutex progress_mutex;
+
+    auto render_thread = [&](int thread_id) {
+        int pixel_index;
+        while ((pixel_index = next_pixel_index++) < image_width * image_height
+        ) {
+            int i = pixel_index % image_width;
+            int j = pixel_index / image_width;
+
             color pixel_color(0, 0, 0);
-            for (int s = 0; s < samples_per_pixel; ++s) {
-                ray_color(get_ray(i, j), max_depth, scene, tmp_color);
-                pixel_color += tmp_color;
-            }
+            for (int s = 0; s < samples_per_pixel; ++s)
+                pixel_color += ray_color(get_ray(i, j), max_depth, scene);
             pixel_color /= samples_per_pixel;
 
-            double progress =
-                (1. + i + j * image_width) / (image_width * image_height);
+            image[pixel_index] = pixel_color;
 
-            progress_bar(progress);
-            write_color(file, pixel_color);
+            std::lock_guard<std::mutex> lock(progress_mutex);
+            progress_bar(double(progress++) / (image_width * image_height));
         }
-    }
+    };
+
+    // Launch threads
+    const int num_threads = std::thread::hardware_concurrency() - 1;
+    std::vector<std::thread> threads;
+    for (int t = 0; t < num_threads; ++t)
+        threads.emplace_back(render_thread, t);
+
+    // Wait for all threads to finish
+    for (auto& thread : threads)
+        thread.join();
+
+    // Write the image to file
+    for (int j = 0; j < image_height; ++j)
+        for (int i = 0; i < image_width; ++i)
+            write_color(file, image[j * image_width + i]);
+
     std::cout << std::endl;
     file.close();
 }
