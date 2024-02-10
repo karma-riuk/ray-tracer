@@ -106,7 +106,7 @@ vec3 camera::pixel_sample_square() const {
 
 void camera::render(const object& scene) {
     initialize();
-    color image[image_width * image_height];
+    std::vector<color> image(image_width * image_height);
 
     std::ofstream file(filename);
     file << "P3\n" << image_width << " " << image_height << "\n255\n";
