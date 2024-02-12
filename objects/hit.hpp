@@ -6,8 +6,8 @@
 struct material;
 
 struct hit {
-    double t;
     bool hit = false;
+    double t = infinity;
     point3 p;
     vec3 normal;
     shared_ptr<material> mat;

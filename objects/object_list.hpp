@@ -6,8 +6,16 @@
 #include <vector>
 
 class object_list : public object {
+    aabb bbox;
+
   public:
     std::vector<std::shared_ptr<object>> objects;
+
+    object_list() {}
+
+    object_list(shared_ptr<object> object) {
+        add(object);
+    }
 
     void clear() {
         objects.clear();
@@ -15,6 +23,7 @@ class object_list : public object {
 
     void add(std::shared_ptr<object> obj) {
         objects.push_back(obj);
+        bbox = aabb(bbox, obj->bounding_box());
     }
 
     hit intersect(const ray& r, interval ray_t) const override {
@@ -31,5 +40,9 @@ class object_list : public object {
         }
 
         return hit;
+    }
+
+    aabb bounding_box() const override {
+        return bbox;
     }
 };

@@ -1,3 +1,4 @@
+#include "bvh_node.hpp"
 #include "camera.hpp"
 #include "materials/dielectric.hpp"
 #include "materials/lambertian.hpp"
@@ -60,12 +61,14 @@ int main() {
     }
 
     auto material1 = make_shared<dielectric>(1.5);
-    scene.add(std::make_shared<sphere>(point3(0, 1, 0), 1, material1));
     auto material2 = make_shared<lambertian>(color(.4, .2, .1));
-    scene.add(std::make_shared<sphere>(point3(-4, 1, 0), 1, material2));
     auto material3 = make_shared<metal>(color(.7, .3, .2), 0);
+
+    scene.add(std::make_shared<sphere>(point3(0, 1, 0), 1, material1));
+    scene.add(std::make_shared<sphere>(point3(-4, 1, 0), 1, material2));
     scene.add(std::make_shared<sphere>(point3(4, 1, 0), 1, material3));
 
+    scene = object_list(make_shared<bvh_node>(scene));
 
     camera cam;
     cam.aspect_ratio = 9. / 16.;

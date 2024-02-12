@@ -28,3 +28,7 @@ hit sphere::intersect(const ray& r, interval ray_t) const {
 
     return hit;
 }
+
+aabb sphere::bounding_box() const {
+    return bbox;
+}
