@@ -113,26 +113,39 @@ void camera::render(const object& scene) {
 
     std::clog << "Writing to " << filename << std::endl;
 
+    int pixel_window = 100; // each thread will render this many pixels before
+                            // getting the new window
     std::atomic<int> progress(0);
     std::atomic<int> next_pixel_index(0);
     std::mutex progress_mutex;
 
     auto render_thread = [&](int thread_id) {
-        int pixel_index;
-        while ((pixel_index = next_pixel_index++) < image_width * image_height
-        ) {
-            int i = pixel_index % image_width;
-            int j = pixel_index / image_width;
+        int start_pixel;
+        while ((start_pixel = next_pixel_index.fetch_add(pixel_window))
+               < image_width * image_height) {
+            std::cout << "Thread " << thread_id << " is starting pixel "
+                      << start_pixel << std::endl;
+            for (int pixel_index = start_pixel;
+                 pixel_index < image_width * image_height
+                 && pixel_index < start_pixel + pixel_window;
+                 pixel_index++) {
+                int i = pixel_index % image_width;
+                int j = pixel_index / image_width;
 
-            color pixel_color(0, 0, 0);
-            for (int s = 0; s < samples_per_pixel; ++s)
-                pixel_color += ray_color(get_ray(i, j), max_depth, scene);
-            pixel_color /= samples_per_pixel;
+                color pixel_color(0, 0, 0);
+                for (int s = 0; s < samples_per_pixel; ++s)
+                    pixel_color += ray_color(get_ray(i, j), max_depth, scene);
+                pixel_color /= samples_per_pixel;
 
-            image[pixel_index] = pixel_color;
+                image[pixel_index] = pixel_color;
 
-            std::lock_guard<std::mutex> lock(progress_mutex);
-            progress_bar(double(progress++) / (image_width * image_height));
+                std::lock_guard<std::mutex> lock(progress_mutex);
+                // progress_bar(double(progress++) / (image_width *
+                // image_height));
+                std::cout << "Thread " << thread_id << " has finished pixel "
+                          << pixel_index << '(' << i << ", " << j << ')'
+                          << std::endl;
+            }
         }
     };
 
