@@ -16,4 +16,9 @@ class dielectric : public material {
     virtual bool scatter(
         const ray& r_in, const hit& rec, color& attenuation, ray& scattered
     ) const override;
+
+    std::ostream& operator<<(std::ostream& out) const override {
+        out << "dielectric(" << ir << ")";
+        return out;
+    };
 };

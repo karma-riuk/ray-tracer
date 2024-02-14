@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../materials/material.hpp"
 #include "object.hpp"
 
 class sphere : public object {
@@ -23,8 +24,8 @@ class sphere : public object {
     virtual aabb bounding_box() const override;
 
     // print the sphere
-    std::ostream& print(std::ostream& out) const override {
-        out << "sphere(" << center << ", " << radius << ")";
+    std::ostream& operator<<(std::ostream& out) const override {
+        out << "sphere(" << center << ", " << radius << ", " << *mat << ")";
         return out;
     };
 };

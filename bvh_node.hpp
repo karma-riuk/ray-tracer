@@ -104,11 +104,12 @@ class bvh_node : public object {
         return bbox;
     }
 
-    // print the bvh_node
-    std::ostream& print(std::ostream& out) const override {
-        out << "bvh_node:" << std::endl
-            << "\tleft: " << left << std::endl
-            << "\tright: " << right;
+    // print the bvh_node and use tabs to indent the children
+    std::ostream& operator<<(std::ostream& out) const override {
+        out << "bvh_node(\n";
+        out << "\t" << *left << ",\n";
+        out << "\t" << *right << "\n";
+        out << ")";
         return out;
     }
 };

@@ -47,7 +47,7 @@ class object_list : public object {
     }
 
     // print the object_list
-    std::ostream& print(std::ostream& out) const override {
+    std::ostream& operator<<(std::ostream& out) const override {
         out << "object_list(";
         for (const auto& obj : objects)
             out << *obj << ", ";

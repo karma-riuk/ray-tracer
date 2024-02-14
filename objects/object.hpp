@@ -11,9 +11,10 @@ class object {
 
     virtual aabb bounding_box() const = 0;
 
-    virtual std::ostream& print(std::ostream& out) const = 0;
+    virtual std::ostream& operator<<(std::ostream& out) const = 0;
 };
 
+// print the object
 inline std::ostream& operator<<(std::ostream& out, const object& obj) {
-    return obj.print(out);
+    return obj.operator<<(out);
 }
