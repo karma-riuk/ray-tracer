@@ -45,4 +45,13 @@ class object_list : public object {
     aabb bounding_box() const override {
         return bbox;
     }
+
+    // print the object_list
+    std::ostream& print(std::ostream& out) const override {
+        out << "object_list(";
+        for (const auto& obj : objects)
+            out << *obj << ", ";
+        out << ")";
+        return out;
+    }
 };

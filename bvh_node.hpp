@@ -103,4 +103,12 @@ class bvh_node : public object {
     aabb bounding_box() const override {
         return bbox;
     }
+
+    // print the bvh_node
+    std::ostream& print(std::ostream& out) const override {
+        out << "bvh_node:" << std::endl
+            << "\tleft: " << left << std::endl
+            << "\tright: " << right;
+        return out;
+    }
 };

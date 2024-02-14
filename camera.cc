@@ -137,7 +137,8 @@ void camera::render(const object& scene) {
     };
 
     // Launch threads
-    const int num_threads = std::thread::hardware_concurrency() - 1;
+    // const int num_threads = std::thread::hardware_concurrency() - 1;
+    const int num_threads = 1;
     std::vector<std::thread> threads;
     for (int t = 0; t < num_threads; ++t)
         threads.emplace_back(render_thread, t);
