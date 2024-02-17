@@ -123,8 +123,6 @@ void camera::render(const object& scene) {
         int start_pixel;
         while ((start_pixel = next_pixel_index.fetch_add(pixel_window))
                < image_width * image_height) {
-            std::cout << "Thread " << thread_id << " is starting pixel "
-                      << start_pixel << std::endl;
             for (int pixel_index = start_pixel;
                  pixel_index < image_width * image_height
                  && pixel_index < start_pixel + pixel_window;
@@ -140,18 +138,14 @@ void camera::render(const object& scene) {
                 image[pixel_index] = pixel_color;
 
                 std::lock_guard<std::mutex> lock(progress_mutex);
-                // progress_bar(double(progress++) / (image_width *
-                // image_height));
-                std::cout << "Thread " << thread_id << " has finished pixel "
-                          << pixel_index << '(' << i << ", " << j << ')'
-                          << std::endl;
+                progress_bar(double(progress++) / (image_width * image_height));
             }
         }
     };
 
     // Launch threads
-    // const int num_threads = std::thread::hardware_concurrency() - 1;
-    const int num_threads = 1;
+    const int num_threads = std::thread::hardware_concurrency() - 1;
+    // const int num_threads = 1;
     std::vector<std::thread> threads;
     for (int t = 0; t < num_threads; ++t)
         threads.emplace_back(render_thread, t);
