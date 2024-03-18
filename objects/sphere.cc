@@ -1,9 +1,15 @@
 #include "sphere.hpp"
 
+#include <mutex>
+
+std::mutex progress_mutex;
+
 hit sphere::intersect(const ray& r, interval ray_t) const {
     hit hit;
 
     hit.hit = false;
+    point3 center = is_moving ? sphere_center(r.time()) : center_point;
+
     vec3 oc = r.origin() - center;
     auto a = dot(r.direction(), r.direction());
     auto b = 2.0 * dot(oc, r.direction());

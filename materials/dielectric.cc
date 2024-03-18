@@ -18,6 +18,6 @@ bool dielectric::scatter(
             ? reflect(unit_direction, hit.normal)
             : refract(unit_direction, hit.normal, refraction_ratio);
 
-    scattered = ray(hit.p, direction);
+    scattered = ray(hit.p, direction, r_in.time());
     return true;
 }

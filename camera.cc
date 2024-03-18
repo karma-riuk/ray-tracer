@@ -90,7 +90,9 @@ ray camera::get_ray(int i, int j) const {
     point3 origin = defocus_angle <= 0 ? camera_center : defocus_disk_sample();
     vec3 direction = pixel_sample - origin;
 
-    return ray(origin, direction);
+    double time = random_double();
+
+    return ray(origin, direction, time);
 }
 
 point3 camera::defocus_disk_sample() const {
@@ -137,8 +139,9 @@ void camera::render(const object& scene) {
 
                 image[pixel_index] = pixel_color;
 
-                std::lock_guard<std::mutex> lock(progress_mutex);
-                progress_bar(double(progress++) / (image_width * image_height));
+                // std::lock_guard<std::mutex> lock(progress_mutex);
+                // progress_bar(double(progress++) / (image_width *
+                // image_height));
             }
         }
     };

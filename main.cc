@@ -7,14 +7,17 @@
 #include "objects/object_list.hpp"
 #include "objects/sphere.hpp"
 
-int main() {
+int main(int argc, char* argv[]) {
     object_list scene;
 
     auto ground_material = make_shared<lambertian>(color(0.5, 0.5, 0.5));
     scene.add(make_shared<sphere>(point3(0, -1000, 0), 1000, ground_material));
 
-    for (int a = -11; a < 11; a++) {
-        for (int b = -11; b < 11; b++) {
+    int N = 10;
+    if (argc == 2)
+        N = atoi(argv[1]);
+    for (int a = -N; a < N; a++) {
+        for (int b = -N; b < N; b++) {
             auto choose_mat = random_double();
             point3 center(
                 a + 0.9 * random_double(),
@@ -29,8 +32,13 @@ int main() {
                     // diffuse
                     auto albedo = color::random() * color::random();
                     sphere_material = make_shared<lambertian>(albedo);
-                    scene.add(make_shared<sphere>(center, 0.2, sphere_material)
-                    );
+                    point3 center2 = center + vec3(0, random_double(0, 0.5), 0);
+                    scene.add(make_shared<sphere>(
+                        center,
+                        // center2,
+                        0.2,
+                        sphere_material
+                    ));
                 } else if (choose_mat < 0.95) {
                     // metal
                     auto albedo = color::random(0.5, 1);
@@ -61,7 +69,7 @@ int main() {
 
     camera cam;
     cam.aspect_ratio = 9. / 16.;
-    cam.image_width = 1200;
+    cam.image_width = 400;
     cam.samples_per_pixel = 32;
     cam.max_depth = 8;
 

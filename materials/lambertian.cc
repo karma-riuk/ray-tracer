@@ -8,7 +8,7 @@ bool lambertian::scatter(
     if (scatter_direction.near_zero())
         scatter_direction = hit.normal;
 
-    scattered = ray(hit.p, scatter_direction);
+    scattered = ray(hit.p, scatter_direction, r_in.time());
     attenuation = albedo;
     return true;
 }
