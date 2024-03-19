@@ -22,6 +22,7 @@ int main(int argc, char* argv[]) {
     int N = 10;
     bool verbose = false;
     bool profile = false;
+    bvh_node::LEAF_SIZE = 1;
 
     // Parse command line arguments
     for (int i = 1; i < argc; i++)
@@ -31,6 +32,8 @@ int main(int argc, char* argv[]) {
             verbose = true;
         else if (std::string(argv[i]) == "-p")
             profile = true;
+        else if (std::string(argv[i]) == "-l")
+            bvh_node::LEAF_SIZE = std::stoi(argv[++i]);
 
     for (int a = -N; a < N; a++) {
         for (int b = -N; b < N; b++) {
