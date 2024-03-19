@@ -25,6 +25,7 @@ int main(int argc, char* argv[]) {
     bool apply_bvh = false;
     bvh_node::LEAF_SIZE = 1;
 
+    camera cam;
     // Parse command line arguments
     for (int i = 1; i < argc; i++)
         if (std::string(argv[i]) == "-n")
@@ -35,6 +36,8 @@ int main(int argc, char* argv[]) {
             profile = true;
         else if (std::string(argv[i]) == "-l")
             bvh_node::LEAF_SIZE = std::stoi(argv[++i]);
+        else if (std::string(argv[i]) == "-w")
+            cam.image_width = std::stoi(argv[++i]);
         else if (std::string(argv[i]) == "-bvh")
             apply_bvh = true;
 
@@ -87,9 +90,7 @@ int main(int argc, char* argv[]) {
         scene = object_list(make_shared<bvh_node>(scene));
     }
 
-    camera cam;
     cam.aspect_ratio = 9. / 16.;
-    cam.image_width = 400;
     cam.samples_per_pixel = 32;
     cam.max_depth = 8;
 
