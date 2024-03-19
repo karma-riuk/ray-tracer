@@ -46,6 +46,13 @@ class object_list : public object {
         return bbox;
     }
 
+    int calculate_depth() const override {
+        int max_depth = 0;
+        for (const auto& obj : objects)
+            max_depth = std::max(max_depth, obj->calculate_depth());
+        return max_depth + 1;
+    }
+
     // print the object_list
     std::ostream& operator<<(std::ostream& out) const override {
         out << "object_list(";

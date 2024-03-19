@@ -47,6 +47,10 @@ class sphere : public object {
         return center_point + time * center_vec;
     }
 
+    virtual int calculate_depth() const override {
+        return 1;
+    }
+
     // print the sphere
     std::ostream& operator<<(std::ostream& out) const override {
         out << "sphere(" << center_point << ", " << radius << ", " << *mat

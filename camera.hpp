@@ -34,5 +34,5 @@ class camera {
     double defocus_angle = 0;
     double focus_dist = 10;
 
-    void render(const object& scene);
+    void render(const object& scene, bool verbose = false);
 };

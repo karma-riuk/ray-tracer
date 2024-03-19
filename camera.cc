@@ -106,14 +106,12 @@ vec3 camera::pixel_sample_square() const {
     return (px * pixel_delta_u + py * pixel_delta_v);
 }
 
-void camera::render(const object& scene) {
+void camera::render(const object& scene, bool verbose) {
     initialize();
     std::vector<color> image(image_width * image_height);
 
     std::ofstream file(filename);
     file << "P3\n" << image_width << " " << image_height << "\n255\n";
-
-    std::clog << "Writing to " << filename << std::endl;
 
     int pixel_window = 100; // each thread will render this many pixels before
                             // getting the new window
@@ -139,9 +137,12 @@ void camera::render(const object& scene) {
 
                 image[pixel_index] = pixel_color;
 
-                // std::lock_guard<std::mutex> lock(progress_mutex);
-                // progress_bar(double(progress++) / (image_width *
-                // image_height));
+                if (verbose) {
+                    std::lock_guard<std::mutex> lock(progress_mutex);
+                    progress_bar(
+                        double(progress++) / (image_width * image_height)
+                    );
+                }
             }
         }
     };
@@ -162,6 +163,9 @@ void camera::render(const object& scene) {
         for (int i = 0; i < image_width; ++i)
             write_color(file, image[j * image_width + i]);
 
-    std::cout << std::endl;
+    if (verbose) { // clear the progress bar
+        std::clog << std::string(80, ' ') << "\r";
+        std::cout.flush();
+    }
     file.close();
 }

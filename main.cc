@@ -6,70 +6,115 @@
 #include "objects/object.hpp"
 #include "objects/object_list.hpp"
 #include "objects/sphere.hpp"
+#include "profiler.hpp"
+
+#define PROFILE_SCOPE(label)                                                   \
+    std::unique_ptr<profiler> _;                                               \
+    if (profile)                                                               \
+        _ = std::make_unique<profiler>(label);
+
+#define HELP_MSG                                                               \
+    "Usage: ./main [OPTIONS]\n"                                                \
+    "Options:\n"                                                               \
+    "  -n <int>       Number of spheres to generate (default: 10)\n"           \
+    "  -v             Verbose mode\n"                                          \
+    "  -p             Profile mode\n"                                          \
+    "  -l <int>       Leaf size for BVH construction (default: 5)\n"           \
+    "  -w <int>       Image width (default: 400)\n"                            \
+    "  --no-bvh       Disable BVH construction\n"                              \
+    "  -h             Print this help message\n"
 
 int main(int argc, char* argv[]) {
+    int N = 10;
+    bool verbose = false;
+    bool profile = false;
+    bool apply_bvh = true;
+    bvh_node::LEAF_SIZE = 5;
+
+    camera cam;
+    cam.image_width = 400;
+
+    // Parse command line arguments
+    for (int i = 1; i < argc; i++)
+        if (std::string(argv[i]) == "-n")
+            N = std::stoi(argv[++i]);
+        else if (std::string(argv[i]) == "-v")
+            verbose = true;
+        else if (std::string(argv[i]) == "-p")
+            profile = true;
+        else if (std::string(argv[i]) == "-l")
+            bvh_node::LEAF_SIZE = std::stoi(argv[++i]);
+        else if (std::string(argv[i]) == "-w")
+            cam.image_width = std::stoi(argv[++i]);
+        else if (std::string(argv[i]) == "--no-bvh")
+            apply_bvh = false;
+        else if (std::string(argv[i]) == "-h") {
+            std::cout << HELP_MSG;
+            return 0;
+        }
+    PROFILE_SCOPE("All");
+
     object_list scene;
 
     auto ground_material = make_shared<lambertian>(color(0.5, 0.5, 0.5));
     scene.add(make_shared<sphere>(point3(0, -1000, 0), 1000, ground_material));
 
-    int N = 10;
-    if (argc == 2)
-        N = atoi(argv[1]);
-    for (int a = -N; a < N; a++) {
-        for (int b = -N; b < N; b++) {
-            auto choose_mat = random_double();
-            point3 center(
-                a + 0.9 * random_double(),
-                0.2,
-                b + 0.9 * random_double()
-            );
+    {
+        PROFILE_SCOPE("Scene generation");
 
-            if ((center - point3(4, 0.2, 0)).length() > 0.9) {
-                shared_ptr<material> sphere_material;
+        for (int a = -N; a < N; a++) {
+            for (int b = -N; b < N; b++) {
+                auto choose_mat = random_double();
+                point3 center(
+                    a + 0.9 * random_double(),
+                    0.2,
+                    b + 0.9 * random_double()
+                );
 
-                if (choose_mat < 0.8) {
-                    // diffuse
-                    auto albedo = color::random() * color::random();
-                    sphere_material = make_shared<lambertian>(albedo);
-                    point3 center2 = center + vec3(0, random_double(0, 0.5), 0);
-                    scene.add(make_shared<sphere>(
-                        center,
-                        // center2,
-                        0.2,
-                        sphere_material
-                    ));
-                } else if (choose_mat < 0.95) {
-                    // metal
-                    auto albedo = color::random(0.5, 1);
-                    auto fuzz = random_double(0, 0.5);
-                    sphere_material = make_shared<metal>(albedo, fuzz);
-                    scene.add(make_shared<sphere>(center, 0.2, sphere_material)
-                    );
-                } else {
-                    // glass
-                    sphere_material = make_shared<dielectric>(1.5);
-                    scene.add(make_shared<sphere>(center, 0.2, sphere_material)
-                    );
+                if ((center - point3(4, 0.2, 0)).length() > 0.9) {
+                    shared_ptr<material> sphere_material;
+
+                    if (choose_mat < 0.8) {
+                        // diffuse
+                        auto albedo = color::random() * color::random();
+                        sphere_material = make_shared<lambertian>(albedo);
+                        scene.add(
+                            make_shared<sphere>(center, 0.2, sphere_material)
+                        );
+                    } else if (choose_mat < 0.95) {
+                        // metal
+                        auto albedo = color::random(0.5, 1);
+                        auto fuzz = random_double(0, 0.5);
+                        sphere_material = make_shared<metal>(albedo, fuzz);
+                        scene.add(
+                            make_shared<sphere>(center, 0.2, sphere_material)
+                        );
+                    } else {
+                        // glass
+                        sphere_material = make_shared<dielectric>(1.5);
+                        scene.add(
+                            make_shared<sphere>(center, 0.2, sphere_material)
+                        );
+                    }
                 }
             }
         }
+        auto material1 = make_shared<dielectric>(1.5);
+        scene.add(make_shared<sphere>(point3(0, 1, 0), 1.0, material1));
+
+        auto material2 = make_shared<lambertian>(color(0.4, 0.2, 0.1));
+        scene.add(make_shared<sphere>(point3(-4, 1, 0), 1.0, material2));
+
+        auto material3 = make_shared<metal>(color(0.7, 0.6, 0.5), 0.0);
+        scene.add(make_shared<sphere>(point3(4, 1, 0), 1.0, material3));
     }
 
-    auto material1 = make_shared<dielectric>(1.5);
-    scene.add(make_shared<sphere>(point3(0, 1, 0), 1.0, material1));
+    if (apply_bvh) {
+        PROFILE_SCOPE("BVH Construction");
+        scene = object_list(make_shared<bvh_node>(scene));
+    }
 
-    auto material2 = make_shared<lambertian>(color(0.4, 0.2, 0.1));
-    scene.add(make_shared<sphere>(point3(-4, 1, 0), 1.0, material2));
-
-    auto material3 = make_shared<metal>(color(0.7, 0.6, 0.5), 0.0);
-    scene.add(make_shared<sphere>(point3(4, 1, 0), 1.0, material3));
-
-    scene = object_list(make_shared<bvh_node>(scene));
-
-    camera cam;
     cam.aspect_ratio = 9. / 16.;
-    cam.image_width = 400;
     cam.samples_per_pixel = 32;
     cam.max_depth = 8;
 
@@ -81,5 +126,8 @@ int main(int argc, char* argv[]) {
     cam.defocus_angle = 0.6;
     cam.focus_dist = 10.0;
 
-    cam.render(scene);
+    {
+        PROFILE_SCOPE("Render");
+        cam.render(scene, verbose);
+    }
 }

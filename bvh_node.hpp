@@ -9,7 +9,10 @@ class bvh_node : public object {
     shared_ptr<object> left, right;
     aabb bbox;
 
+
   public:
+    static inline size_t LEAF_SIZE;
+
     bvh_node(const object_list& list)
         : bvh_node(list.objects, 0, list.objects.size(), 0) {}
 
@@ -19,8 +22,8 @@ class bvh_node : public object {
         size_t end,
         int axis
     ) {
-        auto objects = src_objects; // Create a modifiable array of the source
-                                    // scene objects
+        auto objects = src_objects; // Create a modifiable array of the
+                                    // source scene objects
 
         // int axis = random_int(0, 2);
         auto comparator = (axis == 0) ? box_x_compare
@@ -28,18 +31,18 @@ class bvh_node : public object {
                                       : box_z_compare;
 
         size_t object_span = end - start;
+        auto mid = start + object_span / 2;
 
+        if (object_span < 2 * LEAF_SIZE) {
+            shared_ptr<object_list> tmp_left = make_shared<object_list>();
+            for (size_t i = start; i < mid; i++)
+                tmp_left->add(objects[i]);
+            left = tmp_left;
 
-        if (object_span == 1) {
-            left = right = objects[start];
-        } else if (object_span == 2) {
-            if (comparator(objects[start], objects[start + 1])) {
-                left = objects[start];
-                right = objects[start + 1];
-            } else {
-                left = objects[start + 1];
-                right = objects[start];
-            }
+            shared_ptr<object_list> tmp_right = make_shared<object_list>();
+            for (size_t i = mid; i < end; i++)
+                tmp_right->add(objects[i]);
+            right = tmp_right;
         } else {
             std::sort(
                 objects.begin() + start,
@@ -47,7 +50,6 @@ class bvh_node : public object {
                 comparator
             );
 
-            auto mid = start + object_span / 2;
             axis = (axis + 1) % 3;
             left = make_shared<bvh_node>(objects, start, mid, axis);
             right = make_shared<bvh_node>(objects, mid, end, axis);
@@ -102,6 +104,10 @@ class bvh_node : public object {
 
     aabb bounding_box() const override {
         return bbox;
+    }
+
+    int calculate_depth() const override {
+        return std::max(left->calculate_depth(), right->calculate_depth()) + 1;
     }
 
     // print the bvh_node and use tabs to indent the children
