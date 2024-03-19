@@ -6,15 +6,34 @@
 #include "objects/object.hpp"
 #include "objects/object_list.hpp"
 #include "objects/sphere.hpp"
+#include "profiler.hpp"
 
-int main() {
+#define PROFILE_SCOPE(label)                                                   \
+    std::unique_ptr<profiler> _;                                               \
+    if (profile)                                                               \
+        _ = std::make_unique<profiler>(label);
+
+int main(int argc, char* argv[]) {
     object_list scene;
 
     auto ground_material = make_shared<lambertian>(color(0.5, 0.5, 0.5));
     scene.add(make_shared<sphere>(point3(0, -1000, 0), 1000, ground_material));
 
-    for (int a = -11; a < 11; a++) {
-        for (int b = -11; b < 11; b++) {
+    int N = 10;
+    bool verbose = false;
+    bool profile = false;
+
+    // Parse command line arguments
+    for (int i = 1; i < argc; i++)
+        if (std::string(argv[i]) == "-n")
+            N = std::stoi(argv[++i]);
+        else if (std::string(argv[i]) == "-v")
+            verbose = true;
+        else if (std::string(argv[i]) == "-p")
+            profile = true;
+
+    for (int a = -N; a < N; a++) {
+        for (int b = -N; b < N; b++) {
             auto choose_mat = random_double();
             point3 center(
                 a + 0.9 * random_double(),
@@ -46,22 +65,25 @@ int main() {
                 }
             }
         }
+
+        auto material1 = make_shared<dielectric>(1.5);
+        scene.add(make_shared<sphere>(point3(0, 1, 0), 1.0, material1));
+
+        auto material2 = make_shared<lambertian>(color(0.4, 0.2, 0.1));
+        scene.add(make_shared<sphere>(point3(-4, 1, 0), 1.0, material2));
+
+        auto material3 = make_shared<metal>(color(0.7, 0.6, 0.5), 0.0);
+        scene.add(make_shared<sphere>(point3(4, 1, 0), 1.0, material3));
     }
 
-    auto material1 = make_shared<dielectric>(1.5);
-    scene.add(make_shared<sphere>(point3(0, 1, 0), 1.0, material1));
-
-    auto material2 = make_shared<lambertian>(color(0.4, 0.2, 0.1));
-    scene.add(make_shared<sphere>(point3(-4, 1, 0), 1.0, material2));
-
-    auto material3 = make_shared<metal>(color(0.7, 0.6, 0.5), 0.0);
-    scene.add(make_shared<sphere>(point3(4, 1, 0), 1.0, material3));
-
-    scene = object_list(make_shared<bvh_node>(scene));
+    {
+        PROFILE_SCOPE("");
+        scene = object_list(make_shared<bvh_node>(scene));
+    }
 
     camera cam;
     cam.aspect_ratio = 9. / 16.;
-    cam.image_width = 1200;
+    cam.image_width = 400;
     cam.samples_per_pixel = 32;
     cam.max_depth = 8;
 
@@ -73,5 +95,9 @@ int main() {
     cam.defocus_angle = 0.6;
     cam.focus_dist = 10.0;
 
-    cam.render(scene);
+    {
+        PROFILE_SCOPE("");
+        cam.render(scene, verbose);
+    }
+    std::cerr << scene.calculate_depth() << "\n";
 }

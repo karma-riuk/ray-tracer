@@ -11,6 +11,8 @@ class object {
 
     virtual aabb bounding_box() const = 0;
 
+    virtual int calculate_depth() const = 0;
+
     virtual std::ostream& operator<<(std::ostream& out) const = 0;
 };
 

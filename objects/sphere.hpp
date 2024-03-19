@@ -23,6 +23,10 @@ class sphere : public object {
     virtual hit intersect(const ray& r, interval ray_t) const override;
     virtual aabb bounding_box() const override;
 
+    virtual int calculate_depth() const override {
+        return 1;
+    }
+
     // print the sphere
     std::ostream& operator<<(std::ostream& out) const override {
         out << "sphere(" << center << ", " << radius << ", " << *mat << ")";

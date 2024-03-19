@@ -104,6 +104,10 @@ class bvh_node : public object {
         return bbox;
     }
 
+    int calculate_depth() const override {
+        return std::max(left->calculate_depth(), right->calculate_depth()) + 1;
+    }
+
     // print the bvh_node and use tabs to indent the children
     std::ostream& operator<<(std::ostream& out) const override {
         out << "bvh_node(\n";
