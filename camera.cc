@@ -111,9 +111,6 @@ void camera::render(const object& scene, bool verbose) {
     std::ofstream file(filename);
     file << "P3\n" << image_width << " " << image_height << "\n255\n";
 
-    if (verbose)
-        std::clog << "Writing to " << filename << std::endl;
-
     int pixel_window = 100; // each thread will render this many pixels before
                             // getting the new window
     std::atomic<int> progress(0);
@@ -164,7 +161,9 @@ void camera::render(const object& scene, bool verbose) {
         for (int i = 0; i < image_width; ++i)
             write_color(file, image[j * image_width + i]);
 
-    if (verbose)
-        std::cout << std::endl;
+    if (verbose) { // clear the progress bar
+        std::clog << std::string(80, ' ') << "\r";
+        std::cout.flush();
+    }
     file.close();
 }

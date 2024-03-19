@@ -17,6 +17,7 @@ class profiler {
         if (label == "")
             std::cerr << elapsed.count() << ",";
         else
-            std::cerr << label << ": " << elapsed.count() << " ms\n";
+            std::cerr << label << ": " << elapsed.count() << " ms ("
+                      << elapsed.count() / 1000 << " s)\n";
     }
 };

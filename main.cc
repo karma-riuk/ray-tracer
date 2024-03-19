@@ -25,11 +25,6 @@
     "  -h             Print this message\n"
 
 int main(int argc, char* argv[]) {
-    object_list scene;
-
-    auto ground_material = make_shared<lambertian>(color(0.5, 0.5, 0.5));
-    scene.add(make_shared<sphere>(point3(0, -1000, 0), 1000, ground_material));
-
     int N = 10;
     bool verbose = false;
     bool profile = false;
@@ -37,6 +32,8 @@ int main(int argc, char* argv[]) {
     bvh_node::LEAF_SIZE = 1;
 
     camera cam;
+    cam.image_width = 400;
+
     // Parse command line arguments
     for (int i = 1; i < argc; i++)
         if (std::string(argv[i]) == "-n")
@@ -55,42 +52,53 @@ int main(int argc, char* argv[]) {
             std::cout << HELP_MSG;
             return 0;
         }
+    PROFILE_SCOPE("All");
 
+    object_list scene;
 
-    for (int a = -N; a < N; a++) {
-        for (int b = -N; b < N; b++) {
-            auto choose_mat = random_double();
-            point3 center(
-                a + 0.9 * random_double(),
-                0.2,
-                b + 0.9 * random_double()
-            );
+    auto ground_material = make_shared<lambertian>(color(0.5, 0.5, 0.5));
+    scene.add(make_shared<sphere>(point3(0, -1000, 0), 1000, ground_material));
 
-            if ((center - point3(4, 0.2, 0)).length() > 0.9) {
-                shared_ptr<material> sphere_material;
+    {
+        PROFILE_SCOPE("Scene generation");
 
-                if (choose_mat < 0.8) {
-                    // diffuse
-                    auto albedo = color::random() * color::random();
-                    sphere_material = make_shared<lambertian>(albedo);
-                    scene.add(make_shared<sphere>(center, 0.2, sphere_material)
-                    );
-                } else if (choose_mat < 0.95) {
-                    // metal
-                    auto albedo = color::random(0.5, 1);
-                    auto fuzz = random_double(0, 0.5);
-                    sphere_material = make_shared<metal>(albedo, fuzz);
-                    scene.add(make_shared<sphere>(center, 0.2, sphere_material)
-                    );
-                } else {
-                    // glass
-                    sphere_material = make_shared<dielectric>(1.5);
-                    scene.add(make_shared<sphere>(center, 0.2, sphere_material)
-                    );
+        for (int a = -N; a < N; a++) {
+            for (int b = -N; b < N; b++) {
+                auto choose_mat = random_double();
+                point3 center(
+                    a + 0.9 * random_double(),
+                    0.2,
+                    b + 0.9 * random_double()
+                );
+
+                if ((center - point3(4, 0.2, 0)).length() > 0.9) {
+                    shared_ptr<material> sphere_material;
+
+                    if (choose_mat < 0.8) {
+                        // diffuse
+                        auto albedo = color::random() * color::random();
+                        sphere_material = make_shared<lambertian>(albedo);
+                        scene.add(
+                            make_shared<sphere>(center, 0.2, sphere_material)
+                        );
+                    } else if (choose_mat < 0.95) {
+                        // metal
+                        auto albedo = color::random(0.5, 1);
+                        auto fuzz = random_double(0, 0.5);
+                        sphere_material = make_shared<metal>(albedo, fuzz);
+                        scene.add(
+                            make_shared<sphere>(center, 0.2, sphere_material)
+                        );
+                    } else {
+                        // glass
+                        sphere_material = make_shared<dielectric>(1.5);
+                        scene.add(
+                            make_shared<sphere>(center, 0.2, sphere_material)
+                        );
+                    }
                 }
             }
         }
-
         auto material1 = make_shared<dielectric>(1.5);
         scene.add(make_shared<sphere>(point3(0, 1, 0), 1.0, material1));
 
@@ -102,7 +110,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (apply_bvh) {
-        // PROFILE_SCOPE("");
+        PROFILE_SCOPE("BVH Construction");
         scene = object_list(make_shared<bvh_node>(scene));
     }
 
@@ -122,5 +130,4 @@ int main(int argc, char* argv[]) {
         PROFILE_SCOPE("Render");
         cam.render(scene, verbose);
     }
-    std::cerr << "\n";
 }
