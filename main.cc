@@ -16,20 +16,20 @@
 #define HELP_MSG                                                               \
     "Usage: ./main [OPTIONS]\n"                                                \
     "Options:\n"                                                               \
-    "  -w <int>       Image width\n"                                           \
-    "  -n <int>       Number of spheres\n"                                     \
+    "  -n <int>       Number of spheres to generate (default: 10)\n"           \
     "  -v             Verbose mode\n"                                          \
     "  -p             Profile mode\n"                                          \
-    "  -l <int>       Leaf size for BVH\n"                                     \
-    "  -bvh           Apply BVH\n"                                             \
-    "  -h             Print this message\n"
+    "  -l <int>       Leaf size for BVH construction (default: 5)\n"           \
+    "  -w <int>       Image width (default: 400)\n"                            \
+    "  --no-bvh       Disable BVH construction\n"                              \
+    "  -h             Print this help message\n"
 
 int main(int argc, char* argv[]) {
     int N = 10;
     bool verbose = false;
     bool profile = false;
-    bool apply_bvh = false;
-    bvh_node::LEAF_SIZE = 1;
+    bool apply_bvh = true;
+    bvh_node::LEAF_SIZE = 5;
 
     camera cam;
     cam.image_width = 400;
@@ -46,8 +46,8 @@ int main(int argc, char* argv[]) {
             bvh_node::LEAF_SIZE = std::stoi(argv[++i]);
         else if (std::string(argv[i]) == "-w")
             cam.image_width = std::stoi(argv[++i]);
-        else if (std::string(argv[i]) == "-bvh")
-            apply_bvh = true;
+        else if (std::string(argv[i]) == "--no-bvh")
+            apply_bvh = false;
         else if (std::string(argv[i]) == "-h") {
             std::cout << HELP_MSG;
             return 0;
