@@ -13,6 +13,17 @@
     if (profile)                                                               \
         _ = std::make_unique<profiler>(label);
 
+#define HELP_MSG                                                               \
+    "Usage: ./main [OPTIONS]\n"                                                \
+    "Options:\n"                                                               \
+    "  -w <int>       Image width\n"                                           \
+    "  -n <int>       Number of spheres\n"                                     \
+    "  -v             Verbose mode\n"                                          \
+    "  -p             Profile mode\n"                                          \
+    "  -l <int>       Leaf size for BVH\n"                                     \
+    "  -bvh           Apply BVH\n"                                             \
+    "  -h             Print this message\n"
+
 int main(int argc, char* argv[]) {
     object_list scene;
 
@@ -40,6 +51,11 @@ int main(int argc, char* argv[]) {
             cam.image_width = std::stoi(argv[++i]);
         else if (std::string(argv[i]) == "-bvh")
             apply_bvh = true;
+        else if (std::string(argv[i]) == "-h") {
+            std::cout << HELP_MSG;
+            return 0;
+        }
+
 
     for (int a = -N; a < N; a++) {
         for (int b = -N; b < N; b++) {
@@ -103,8 +119,8 @@ int main(int argc, char* argv[]) {
     cam.focus_dist = 10.0;
 
     {
-        PROFILE_SCOPE("");
+        PROFILE_SCOPE("Render");
         cam.render(scene, verbose);
     }
-    std::cerr << scene.calculate_depth() << "\n";
+    std::cerr << "\n";
 }
