@@ -22,6 +22,7 @@ int main(int argc, char* argv[]) {
     int N = 10;
     bool verbose = false;
     bool profile = false;
+    bool apply_bvh = false;
     bvh_node::LEAF_SIZE = 1;
 
     // Parse command line arguments
@@ -34,6 +35,8 @@ int main(int argc, char* argv[]) {
             profile = true;
         else if (std::string(argv[i]) == "-l")
             bvh_node::LEAF_SIZE = std::stoi(argv[++i]);
+        else if (std::string(argv[i]) == "-bvh")
+            apply_bvh = true;
 
     for (int a = -N; a < N; a++) {
         for (int b = -N; b < N; b++) {
@@ -79,8 +82,8 @@ int main(int argc, char* argv[]) {
         scene.add(make_shared<sphere>(point3(4, 1, 0), 1.0, material3));
     }
 
-    {
-        PROFILE_SCOPE("");
+    if (apply_bvh) {
+        // PROFILE_SCOPE("");
         scene = object_list(make_shared<bvh_node>(scene));
     }
 
