@@ -22,6 +22,7 @@
     "  -l <int>       Leaf size for BVH construction (default: 5)\n"           \
     "  -w <int>       Image width (default: 400)\n"                            \
     "  --no-bvh       Disable BVH construction\n"                              \
+    "  -s <int>       Samples per pixel (default: 32)\n"                       \
     "  -h             Print this help message\n"
 
 int main(int argc, char* argv[]) {
@@ -33,6 +34,7 @@ int main(int argc, char* argv[]) {
 
     camera cam;
     cam.image_width = 400;
+    cam.samples_per_pixel = 32;
 
     // Parse command line arguments
     for (int i = 1; i < argc; i++)
@@ -46,6 +48,8 @@ int main(int argc, char* argv[]) {
             bvh_node::LEAF_SIZE = std::stoi(argv[++i]);
         else if (std::string(argv[i]) == "-w")
             cam.image_width = std::stoi(argv[++i]);
+        else if (std::string(argv[i]) == "-s")
+            cam.samples_per_pixel = std::stoi(argv[++i]);
         else if (std::string(argv[i]) == "--no-bvh")
             apply_bvh = false;
         else if (std::string(argv[i]) == "-h") {
@@ -115,7 +119,6 @@ int main(int argc, char* argv[]) {
     }
 
     cam.aspect_ratio = 9. / 16.;
-    cam.samples_per_pixel = 32;
     cam.max_depth = 8;
 
     cam.vfov = 20;
